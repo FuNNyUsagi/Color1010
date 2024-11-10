@@ -1,0 +1,148 @@
+function tablefindbytable(t, value)
+	for i, v in ipairs(t) do
+		if equals(v, value, true) then
+			return i
+		end
+	end
+	return nil
+end
+
+function tablefindbytablefull(t, value)
+	for ix, vl in pairs(t) do
+		for i, v in ipairs(vl) do
+			if equals(v, value, true) then
+				return i
+			end
+		end
+	end		
+	return nil
+end
+
+function equals(o1, o2, ignore_mt)
+	if o1 == o2 then return true end
+	local o1Type = type(o1)
+	local o2Type = type(o2)
+	if o1Type ~= o2Type then return false end
+	if o1Type ~= 'table' then return false end
+	if not ignore_mt then
+		local mt1 = getmetatable(o1)
+		if mt1 and mt1.__eq then
+			--compare using built in method
+			return o1 == o2
+		end
+	end
+	local keySet = {}
+	for key1, value1 in pairs(o1) do
+		local value2 = o2[key1]
+		if value2 == nil or equals(value1, value2, ignore_mt) == false then
+			return false
+		end
+		keySet[key1] = true
+	end
+	for key2, _ in pairs(o2) do
+		if not keySet[key2] then return false end
+	end
+	return true
+end
+
+function checkTable()
+	for i=1, 4 do
+		local oneType = {}
+		for j, v in ipairs(JUST_DEPLOYED) do
+			if v[5] == i then
+				table.insert(oneType, v)
+			end
+		end
+
+		--delta = 75
+		if #oneType ~= 0 then
+			blockChain = {}
+			blockBuff = {}
+
+			for ix, vl in ipairs(oneType) do
+				blockPool = {}
+				table.insert(blockPool, vl)
+				
+				repeat
+					blockBuff = {}
+
+					for j, v in ipairs(blockPool) do
+						for j=1, #DEPLOY_BLOCK do
+							deploed = DEPLOY_BLOCK[j]
+							
+							if v[3] == deploed[3] and v[5] == deploed[5] then
+								if math.abs(v[4] - deploed[4]) == 75 then
+									blockChain = addTableTable(blockChain, vl[1], v)
+									
+									if tablefindbytablefull(blockChain, deploed) == nil then
+										if tablefindbytable(blockBuff, deploed) == nil then
+											table.insert(blockBuff, deploed)
+										end
+									end
+								end
+							elseif v[4] == deploed[4] and v[5] == deploed[5] then
+								if math.abs(v[3] - deploed[3]) == 75 then
+									blockChain = addTableTable(blockChain, vl[1], v)
+
+									if tablefindbytablefull(blockChain, deploed) == nil then
+										if tablefindbytable(blockBuff, deploed) == nil then
+											table.insert(blockBuff, deploed)
+										end
+									end
+								end
+							end
+						end				
+					end
+					blockPool = blockBuff
+				until #blockPool == 0
+			end
+			
+			for q, p in pairs(blockChain) do
+				if #p >= 3 then
+					for k, l in ipairs(p) do
+						local ji = tablefindbytable(DEPLOY_BLOCK, l)
+						if ji then
+							table.remove(DEPLOY_BLOCK, ji)
+						end
+
+						local url = msg.url(nil, l[1], "collisionobject")
+						msg.post(url, "disable")
+						go.delete(l[1])
+
+						msg.post(l[2], "showField")
+						msg.post(l[2], "enableCO")
+
+						TOTAL_SCORE = TOTAL_SCORE + 1
+					end
+				end
+			end
+		end
+	end
+	JUST_DEPLOYED = {}
+	label.set_text("/score#totalScore", TOTAL_SCORE)
+end
+
+function init(self)
+	TRIGGER_BLOCK = {}
+	DEPLOY_BLOCK = {}  -- 1 - имя блока, 2 - имя тайла, 3 - координата x, 4 - координата y, 5 - тип
+	DEPLOY = 0
+	JUST_DEPLOYED = {} -- 1 - имя блока, 2 - имя тайла, 3 - координата x, 4 - координата y, 5 - тип
+	TOTAL_SCORE = 0
+
+	msg.post('factory', "initField")
+	msg.post('factory', "initContainer")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("releasedBlock") then		
+		checkTable()
+		
+		DEPLOY = DEPLOY+1
+		if DEPLOY == 3 then
+			DEPLOY = 0
+
+			msg.post('factory', "initContainer")
+		end
+		--pprint(DEPLOY_BLOCK)
+	end
+end

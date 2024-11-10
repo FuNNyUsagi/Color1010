@@ -1,0 +1,17 @@
+function init(self)
+	go.set_scale(0.1)
+	local s = 1.0
+	go.animate(go.get_id(), "scale", go.PLAYBACK_ONCE_FORWARD, s, go.EASING_OUTBACK, 1)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("disableCO") then
+		msg.post("#collisionobject", "disable")
+	elseif message_id == hash("enableCO") then
+		msg.post("#collisionobject", "enable")
+	elseif message_id == hash("hideField") then
+		msg.post("#sprite", "disable")
+	elseif message_id == hash("showField") then
+		msg.post("#sprite", "enable")
+	end
+end

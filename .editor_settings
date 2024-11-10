@@ -1,0 +1,32 @@
+{
+  :bundle {
+    :android {
+      :architecture {
+        :arm64-android false
+        :armv7-android true
+      }
+      :format "apk"
+      :install false
+      :launch false
+    }
+    :build-report false
+    :contentless false
+    :debug-symbols true
+    :liveupdate false
+    :texture-compression "enabled"
+    :variant "debug"
+  }
+  :code {
+    :find {
+      :term "addTableTable"
+    }
+  }
+  :workflow {
+    :recent-files [
+      [
+        "/main/scipts/mainController.script"
+        :code
+      ]
+    ]
+  }
+}

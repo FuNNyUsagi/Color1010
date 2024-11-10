@@ -1,0 +1,19 @@
+images {
+  image: "/main/images/blue_sqrt.png"
+}
+images {
+  image: "/main/images/green_sqrt.png"
+}
+images {
+  image: "/main/images/orange_sqrt.png"
+}
+images {
+  image: "/main/images/red_sqrt.png"
+}
+images {
+  image: "/main/images/tile.png"
+}
+images {
+  image: "/main/images/background.jpg"
+}
+extrude_borders: 2

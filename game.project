@@ -1,0 +1,22 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+
+[script]
+shared_state = 1
+
+[display]
+width = 1366
+height = 768
+
+[android]
+input_method = HiddenInputField
+
+[project]
+title = TestOleg
+
+[sprite]
+max_count = 5000
+
+[physics]
+max_collision_object_count = 5000
+

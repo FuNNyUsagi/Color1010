@@ -1,0 +1,74 @@
+go.property('count_block', 0)
+
+function getTableSize(t)
+	local count = 0
+	for _, _ in pairs(t) do
+		count = count + 1
+	end
+	return count
+end
+
+function count_repeating_elements(t)
+	local counts = {}
+
+	-- Подсчитываем количество вхождений каждого элемента
+	for _, v in pairs(t) do
+		if counts[v[1]] then
+			counts[v[1]] = counts[v[1]] + 1
+		else
+			counts[v[1]] = 1
+		end
+	end
+
+	local count = 0
+	for _, _ in pairs(counts) do
+		count = count + 1
+	end
+	return count
+end
+
+function init(self)
+	self.origPos = go.get_position()
+
+	go.set_scale(0.1)
+	local s = 0.7
+	go.animate(go.get_id(), "scale", go.PLAYBACK_ONCE_FORWARD, s, go.EASING_OUTBACK, 1)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("draggingBlock") then
+		local s2 = vmath.vector3(0.9, 0.9, 1.0)
+		go.set_scale(s2, go.get_id())
+	elseif message_id == hash("releasedBlock") then
+		if count_repeating_elements(TRIGGER_BLOCK) == self.count_block then		
+			local s1 = vmath.vector3(1.0, 1.0, 1.0)
+			go.set_scale(s1, go.get_id())
+
+			for i, v in pairs(TRIGGER_BLOCK) do
+				local blockID = i
+				local tileID = v[1]				
+
+				local url = msg.url(nil, blockID, "BlockController")
+				table.insert(DEPLOY_BLOCK, {blockID, tileID, go.get_position(tileID).x, go.get_position(tileID).y, go.get(url, "typeobj")})
+				table.insert(JUST_DEPLOYED, {blockID, tileID, go.get_position(tileID).x, go.get_position(tileID).y, go.get(url, "typeobj")})
+				
+				msg.post(tileID, "hideField")
+				msg.post(tileID, "disableCO")
+
+				go.set_parent(blockID)				
+				go.set_position(go.get_position(tileID), blockID)
+
+				msg.post(blockID, "releasedBlock")
+			end
+			
+			msg.post('controller#mainController', "releasedBlock")
+			go.delete()
+		else
+			msg.post("#collisionobject", "disable")
+
+			local s1 = vmath.vector3(0.7, 0.7, 1.0)
+			go.set_scale(s1, go.get_id())
+			go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.origPos, go.EASING_OUTCUBIC, 1, 0, msg.post("#collisionobject", "enable"))			
+		end
+	end
+end

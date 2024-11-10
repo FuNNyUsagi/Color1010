@@ -1,0 +1,70 @@
+go.property("typeobj", 0)
+
+function tablefullfind(t, value, key)
+	for i, v in pairs(t) do
+		if v == value and i == key then
+			return i
+		end
+	end
+	return nil
+end
+
+function tablefind(t, value)
+	for i, v in ipairs(t) do
+		if v == value then
+			return i
+		end
+	end
+	return nil
+end
+
+function addTableTable (t, key, value)
+	if t[key] then
+		if tablefind(t[key], value) == nil then
+			table.insert(t[key], value)
+		end        
+	else
+		t[key] = {value}
+	end
+
+	return t
+end
+
+function delFromTable (t, index, value)
+	local tt = t[index]
+	if tt then
+		local index2 = tablefind(tt, value)
+		if index2 then
+			table.remove(tt, index2)
+		end
+		if #tt ~= 0 then
+			t[index] = tt
+		else 
+			t[index] = nil
+		end
+	end	
+	return t
+end
+
+function init(self)
+	self.origPos = go.get_position()
+	self.blockID = go.get_id()
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.other_group == hash("tileBlock") then		
+		if message.enter == true then			
+			--TRIGGER_BLOCK[self.blockID] = message.other_id
+			TRIGGER_BLOCK = addTableTable(TRIGGER_BLOCK, self.blockID, message.other_id)
+			--pprint(self.typeobj)
+		elseif message.enter == false then
+			--[[if tablefind(TRIGGER_BLOCK, message.other_id, self.blockID) then
+				TRIGGER_BLOCK[self.blockID] = nil
+			end]]
+			TRIGGER_BLOCK = delFromTable(TRIGGER_BLOCK, self.blockID, message.other_id)			
+		elseif message_id == hash("releasedBlock") then
+			msg.post("#collisionobject", "disable")
+		end
+		--pprint(TRIGGER_BLOCK)
+	end
+end
